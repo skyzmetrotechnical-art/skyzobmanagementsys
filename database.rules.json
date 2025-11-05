@@ -1,0 +1,22 @@
+{
+  "rules": {
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid == $userId || root.child('users').child(auth.uid).child('role').val() == 'admin')",
+        ".write": "auth != null && (auth.uid == $userId || root.child('users').child(auth.uid).child('role').val() == 'admin')"
+      }
+    },
+    "equipment": {
+      ".read": "auth != null",
+      "$equipmentId": {
+        ".write": "auth != null && root.child('users').child(auth.uid).child('role').val() == 'admin'"
+      }
+    },
+    "requests": {
+      ".read": "auth != null",
+      "$requestId": {
+        ".write": "auth != null"
+      }
+    }
+  }
+}

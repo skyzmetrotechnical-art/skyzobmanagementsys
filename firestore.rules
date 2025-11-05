@@ -1,0 +1,34 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() { return request.auth != null; }
+    function isAdmin() { return isSignedIn() && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'); }
+    function userDept() { return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.department; }
+
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow write: if isAdmin() || request.auth.uid == userId; // users can update their own profile (e.g., signatureRef)
+    }
+
+    match /equipment/{id} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /requests/{requestId} {
+      allow read: if isSignedIn();
+
+      // Only admins or the department assigned to current step can write their department's subfields
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (
+          request.resource.data.keys().hasOnly(['steps', 'history']) &&
+          request.resource.data.steps[userDept()].diff(resource.data.steps[userDept()]).changedKeys().hasOnly(['form'])
+        )
+      );
+
+      allow create: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+  }
+}

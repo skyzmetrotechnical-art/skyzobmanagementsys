@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OB Workflow Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <aside class="w-full md:w-80 bg-gradient-to-b from-purple-900 via-purple-800 to-orange-900 text-white p-6 md:p-8 relative">
+            <div class="mb-12">
+                <h1 class="text-2xl font-bold mb-2">OB Workflow System</h1>
+                <p class="text-purple-200 text-sm">Follow the steps to complete your workflow</p>
+            </div>
+
+            <div class="relative">
+                <div class="absolute left-6 top-0 bottom-0 w-0.5 bg-purple-600"></div>
+                
+                <div class="step-item relative mb-8 flex items-start" data-step="1">
+                    <div class="step-icon w-12 h-12 rounded-full bg-orange-500 flex items-center justify-center relative z-10 shadow-lg">
+                        <i class="fas fa-bullhorn text-white"></i>
+                    </div>
+                    <div class="ml-4 mt-2">
+                        <h3 class="font-semibold text-lg">Marketing</h3>
+                        <p class="text-purple-300 text-sm">Browse and upload</p>
+                    </div>
+                </div>
+
+                <div class="step-item relative mb-8 flex items-start opacity-50" data-step="2">
+                    <div class="step-icon w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center relative z-10 border-2 border-purple-600">
+                        <i class="fas fa-tv text-white"></i>
+                    </div>
+                    <div class="ml-4 mt-2">
+                        <h3 class="font-semibold text-lg">Programming</h3>
+                        <p class="text-purple-300 text-sm">Browse and upload</p>
+                    </div>
+                </div>
+
+                <div class="step-item relative mb-8 flex items-start opacity-50" data-step="3">
+                    <div class="step-icon w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center relative z-10 border-2 border-purple-600">
+                        <i class="fas fa-cogs text-white"></i>
+                    </div>
+                    <div class="ml-4 mt-2">
+                        <h3 class="font-semibold text-lg">Technical</h3>
+                        <p class="text-purple-300 text-sm">Browse and upload</p>
+                    </div>
+                </div>
+
+                <div class="step-item relative mb-8 flex items-start opacity-50" data-step="4">
+                    <div class="step-icon w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center relative z-10 border-2 border-purple-600">
+                        <i class="fas fa-clipboard-list text-white"></i>
+                    </div>
+                    <div class="ml-4 mt-2">
+                        <h3 class="font-semibold text-lg">Admin</h3>
+                        <p class="text-purple-300 text-sm">Browse and upload</p>
+                    </div>
+                </div>
+
+                <div class="step-item relative mb-8 flex items-start opacity-50" data-step="5">
+                    <div class="step-icon w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center relative z-10 border-2 border-purple-600">
+                        <i class="fas fa-dollar-sign text-white"></i>
+                    </div>
+                    <div class="ml-4 mt-2">
+                        <h3 class="font-semibold text-lg">Finance</h3>
+                        <p class="text-purple-300 text-sm">Browse and upload</p>
+                    </div>
+                </div>
+
+                <div class="step-item relative flex items-start opacity-50" data-step="6">
+                    <div class="step-icon w-12 h-12 rounded-full bg-gray-600 flex items-center justify-center relative z-10 border-2 border-purple-600">
+                        <i class="fas fa-check-circle text-white"></i>
+                    </div>
+                    <div class="ml-4 mt-2">
+                        <h3 class="font-semibold text-lg">Review</h3>
+                        <p class="text-purple-300 text-sm">Browse and upload</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-12">
+            <div id="step1" class="content-section">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <span class="text-purple-600 text-sm font-semibold">Step 1/6</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">Marketing Department</h2>
+                        <p class="text-gray-600 mt-2">Initiates new OB requests, enters client/event details, proposed schedule, location, and estimated costs.</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Client/Event Name</label>
+                            <input type="text" placeholder="e.g., Music Festival 2025" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                            <input type="text" placeholder="e.g., City Hall" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Proposed Schedule</label>
+                            <input type="datetime-local" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Estimated Cost ($)</label>
+                            <input type="number" placeholder="e.g., 5000" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">Crew Required</label>
+                            <div class="space-y-3">
+                                <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                                    <input type="checkbox" id="crew-technical" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                                    <label for="crew-technical" class="ml-3 text-gray-700 font-medium">Technical</label>
+                                </div>
+                                <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                                    <input type="checkbox" id="crew-social" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                                    <label for="crew-social" class="ml-3 text-gray-700 font-medium">Social Media</label>
+                                </div>
+                                <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                                    <input type="checkbox" id="crew-freelancer" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                                    <label for="crew-freelancer" class="ml-3 text-gray-700 font-medium">Freelancer</label>
+                                </div>
+                                <div class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                                    <input type="checkbox" id="crew-other" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                                    <label for="crew-other" class="ml-3 text-gray-700 font-medium">Other</label>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="step2" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <span class="text-purple-600 text-sm font-semibold">Step 2/6</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">Programming Department</h2>
+                        <p class="text-gray-600 mt-2">Reviews content and scheduling conflicts; approves or requests adjustments to ensure alignment with broadcast programming.</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Presenter/s</label>
+                            <input type="text" placeholder="e.g., John Doe, Jane Smith" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Crossover Times</label>
+                            <input type="text" placeholder="e.g., 18:00 - 19:30" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Content Alignment</label>
+                            <select class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                                <option>Approved</option>
+                                <option>Requires Adjustment</option>
+                                <option>Rejected</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Notes</label>
+                            <textarea rows="4" placeholder="e.g., Conflicts with evening news broadcast." class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="step3" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <span class="text-purple-600 text-sm font-semibold">Step 3/6</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">Technical Department</h2>
+                        <p class="text-gray-600 mt-2">Evaluates technical feasibility (equipment, signal coverage, crew availability, logistics).</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Crew Members Allocated</label>
+                            <select class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                                <option value="">Select crew member...</option>
+                                <option>Michael Johnson - Camera Operator</option>
+                                <option>Sarah Williams - Sound Engineer</option>
+                                <option>David Brown - Lighting Technician</option>
+                                <option>Emily Davis - Video Editor</option>
+                                <option>James Wilson - Technical Director</option>
+                                <option>Lisa Anderson - Production Assistant</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Equipment Needed</label>
+                            <textarea rows="4" placeholder="e.g., 2x HD Cameras, Satellite Truck, Audio Mixer, Lighting Kit" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Feasibility Check</label>
+                            <select class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                                <option>Feasible</option>
+                                <option>Feasible with conditions</option>
+                                <option>Not Feasible</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Technical Notes</label>
+                            <textarea rows="4" placeholder="e.g., Requires extra satellite truck. All crew available." class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="step4" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <span class="text-purple-600 text-sm font-semibold">Step 4/6</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">Admin Department</h2>
+                        <p class="text-gray-600 mt-2">Confirms resource allocation (transport, accommodation, permits, etc.).</p>
+                    </div>
+
+                    <form class="space-y-4">
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                            <input type="checkbox" id="transport" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                            <label for="transport" class="ml-3 text-gray-700 font-medium">Transport Confirmed</label>
+                        </div>
+
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                            <input type="checkbox" id="accommodation" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                            <label for="accommodation" class="ml-3 text-gray-700 font-medium">Accommodation Confirmed</label>
+                        </div>
+
+                        <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                            <input type="checkbox" id="permits" class="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-purple-500">
+                            <label for="permits" class="ml-3 text-gray-700 font-medium">Permits Acquired</label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="step5" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <span class="text-purple-600 text-sm font-semibold">Step 5/6</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">Finance Department</h2>
+                        <p class="text-gray-600 mt-2">Reviews and authorizes budget and financial aspects before release.</p>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Amount Allocated ($)</label>
+                            <input type="number" placeholder="e.g., 5000" class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Budget Status</label>
+                            <select class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition">
+                                <option>Approved</option>
+                                <option>Pending Review</option>
+                                <option>Rejected</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Financial Notes</label>
+                            <textarea rows="4" placeholder="e.g., Budget approved. Funds will be released 48 hours before event." class="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-purple-500 focus:outline-none transition"></textarea>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="step6" class="content-section hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <span class="text-purple-600 text-sm font-semibold">Step 6/6</span>
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 mt-2">Final Review & Archiving</h2>
+                        <p class="text-gray-600 mt-2">Conducts final review, generates reports, and archives the OB record.</p>
+                    </div>
+
+                    <div class="bg-gradient-to-r from-orange-50 to-purple-50 rounded-xl p-6 border-2 border-orange-200">
+                        <h4 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                            <i class="fas fa-clipboard-check text-orange-600 mr-2"></i>
+                            Request Summary
+                        </h4>
+                        <div class="space-y-2">
+                            <p class="text-gray-700"><strong>Client:</strong> Music Festival 2025</p>
+                            <p class="text-gray-700"><strong>Location:</strong> City Hall</p>
+                            <p class="text-gray-700"><strong>Status:</strong> <span class="inline-block px-3 py-1 bg-orange-500 text-white rounded-full text-sm">Approved by all departments</span></p>
+                            <p class="text-gray-600 mt-4">Ready for final sign-off and archiving.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-between items-center mt-8 max-w-3xl mx-auto gap-4 sm:gap-0">
+                <button id="prevBtn" class="w-full sm:w-auto px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    <i class="fas fa-arrow-left mr-2"></i>Back
+                </button>
+                <button id="nextBtn" class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-orange-500 to-purple-600 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-purple-700 transition shadow-lg hover:shadow-xl">
+                    Next<i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const stepItems = document.querySelectorAll('.step-item');
+        const contentSections = document.querySelectorAll('.content-section');
+        
+        let currentStep = 1;
+        const totalSteps = 6;
+
+        nextBtn.addEventListener('click', () => {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                updateProgress();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentStep > 1) {
+                currentStep--;
+                updateProgress();
+            }
+        });
+
+        function updateProgress() {
+            // Update sidebar steps
+            stepItems.forEach((item, index) => {
+                const stepNum = index + 1;
+                const icon = item.querySelector('.step-icon');
+                
+                if (stepNum < currentStep) {
+                    // Completed steps
+                    item.classList.remove('opacity-50');
+                    icon.classList.remove('bg-gray-600', 'border-2', 'border-purple-600', 'bg-gradient-to-br', 'from-purple-500', 'to-orange-600', 'ring-4', 'ring-purple-300');
+                    icon.classList.add('bg-orange-500');
+                } else if (stepNum === currentStep) {
+                    // Current step
+                    item.classList.remove('opacity-50');
+                    icon.classList.remove('bg-gray-600', 'bg-orange-500', 'border-2', 'border-purple-600');
+                    icon.classList.add('bg-gradient-to-br', 'from-purple-500', 'to-orange-600', 'ring-4', 'ring-purple-300');
+                } else {
+                    // Future steps
+                    item.classList.add('opacity-50');
+                    icon.classList.remove('bg-orange-500', 'bg-gradient-to-br', 'from-purple-500', 'to-orange-600', 'ring-4', 'ring-purple-300');
+                    icon.classList.add('bg-gray-600', 'border-2', 'border-purple-600');
+                }
+            });
+
+            // Update content sections
+            contentSections.forEach((section, index) => {
+                if (index + 1 === currentStep) {
+                    section.classList.remove('hidden');
+                } else {
+                    section.classList.add('hidden');
+                }
+            });
+
+            // Update button states
+            prevBtn.disabled = currentStep === 1;
+            nextBtn.disabled = currentStep === totalSteps;
+            
+            // Change button text on last step
+            if (currentStep === totalSteps) {
+                nextBtn.innerHTML = 'Complete Submission<i class="fas fa-check ml-2"></i>';
+            } else {
+                nextBtn.innerHTML = 'Next<i class="fas fa-arrow-right ml-2"></i>';
+            }
+        }
+    </script>
+</body>
+</html>
