@@ -24,8 +24,8 @@ const Profile: React.FC = () => {
   const updatePin = async () => {
     if (!profile) return
     
-    if (!/^\d{4,8}$/.test(pin)) {
-      toast.error('PIN must be 4-8 digits')
+    if (!/^\d{4}$/.test(pin)) {
+      toast.error('PIN must be exactly 4 digits')
       return
     }
 
@@ -218,18 +218,19 @@ const Profile: React.FC = () => {
 
               <h6 className="mb-3">Approval PIN</h6>
               <Alert variant="info" className="small mb-3">
-                Set a 4-8 digit PIN to approve or reject requests.
+                Set a 4-digit PIN to approve or reject requests.
               </Alert>
               
               <Form.Group className="mb-3">
-                <Form.Label className="small">New PIN (4-8 digits)</Form.Label>
+                <Form.Label className="small">New PIN (4 digits)</Form.Label>
                 <Form.Control 
                   size="sm"
                   type="password" 
-                  placeholder="Enter PIN" 
+                  placeholder="Enter 4-digit PIN" 
                   value={pin} 
-                  onChange={(e) => setPin(e.target.value)}
-                  maxLength={8}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
+                  maxLength={4}
+                  pattern="\d{4}"
                 />
               </Form.Group>
 
@@ -238,10 +239,11 @@ const Profile: React.FC = () => {
                 <Form.Control 
                   size="sm"
                   type="password" 
-                  placeholder="Confirm PIN" 
+                  placeholder="Confirm 4-digit PIN" 
                   value={confirmPin} 
-                  onChange={(e) => setConfirmPin(e.target.value)}
-                  maxLength={8}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, ''))}
+                  maxLength={4}
+                  pattern="\d{4}"
                 />
               </Form.Group>
 

@@ -198,20 +198,23 @@ const NewRequest: React.FC = () => {
                 />
               </Form.Group>
             </Col>
-            <Col md={6}>
-              <Form.Group>
-                <Form.Label className="fw-semibold small">Estimated Cost ($)</Form.Label>
-                <Form.Control 
-                  size="sm"
-                  type="number"
-                  value={estimatedCost} 
-                  onChange={(e) => setEstimatedCost(e.target.value)}
-                  placeholder="e.g., 5000"
-                  min="0"
-                  step="0.01"
-                />
-              </Form.Group>
-            </Col>
+            {/* Show Estimated Cost only to Marketing department */}
+            {profile?.department === 'marketing' && (
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label className="fw-semibold small">Estimated Cost ($)</Form.Label>
+                  <Form.Control 
+                    size="sm"
+                    type="number"
+                    value={estimatedCost} 
+                    onChange={(e) => setEstimatedCost(e.target.value)}
+                    placeholder="e.g., 5000"
+                    min="0"
+                    step="0.01"
+                  />
+                </Form.Group>
+              </Col>
+            )}
           </Row>
 
           <div className="mt-4">
@@ -345,13 +348,15 @@ const NewRequest: React.FC = () => {
                 size="sm"
                 type="password" 
                 value={pin} 
-                onChange={(e) => setPin(e.target.value)} 
-                placeholder="Enter your PIN"
+                onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))} 
+                placeholder="Enter your 4-digit PIN"
                 disabled={submitting}
                 autoFocus
+                maxLength={4}
+                pattern="\d{4}"
               />
               <Form.Text className="text-muted">
-                Enter the PIN you set in your profile to confirm and sign this request
+                Enter the 4-digit PIN you set in your profile to confirm and sign this request
               </Form.Text>
             </Form.Group>
           )}

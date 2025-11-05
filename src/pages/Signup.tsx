@@ -32,14 +32,15 @@ const Signup: React.FC = () => {
   }
 
   return (
-    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #2B3E7E 0%, #4A5F9F 100%)' }}>
       <ToastContainer position="top-right" />
-      <Card style={{ width: 450 }}>
-        <Card.Body>
+      <Card className="custom-card scale-in" style={{ width: 480, border: 'none' }}>
+        <Card.Body className="p-4">
           <div className="text-center mb-4">
-            <Logo size="large" showText={true} className="justify-center" />
+            <Logo size="large" showText={false} className="justify-center" />
           </div>
-          <Card.Title className="mb-3 text-center">Create Account for OB Management System</Card.Title>
+          <h3 className="mb-2 text-center" style={{ color: 'var(--primary-navy)', fontWeight: 700 }}>Create Account</h3>
+          <p className="text-center mb-4" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Join OB Management System</p>
           <Form onSubmit={onSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Full Name</Form.Label>
@@ -103,13 +104,13 @@ const Signup: React.FC = () => {
               </Form.Select>
             </Form.Group>
 
-            <Button type="submit" disabled={loading} className="w-100" variant="primary">
-              {loading ? 'Creating Account...' : 'Sign Up'}
+            <Button type="submit" disabled={loading} className="w-100" variant="primary" size="lg">
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
 
             <div className="text-center mt-3">
-              <small>
-                Already have an account? <Link to="/login">Sign in</Link>
+              <small style={{ color: 'var(--text-secondary)' }}>
+                Already have an account? <Link to="/login" style={{ color: 'var(--primary-orange)', fontWeight: 600 }}>Sign in</Link>
               </small>
             </div>
           </Form>

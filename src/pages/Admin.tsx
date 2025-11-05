@@ -60,6 +60,9 @@ const Admin: React.FC = () => {
   })
   const [generatedPassword, setGeneratedPassword] = useState('')
   const [saving, setSaving] = useState(false)
+  const [adminPin, setAdminPin] = useState('')
+  const [showPinModal, setShowPinModal] = useState(false)
+  const [pendingUserData, setPendingUserData] = useState<any>(null)
 
   // Team members state
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
@@ -361,11 +364,10 @@ const Admin: React.FC = () => {
       return
     }
 
-    setSaving(true)
-
-    try {
-      if (editingUser) {
-        // Update existing user
+    if (editingUser) {
+      // Update existing user - no PIN needed for updates
+      setSaving(true)
+      try {
         const userRef = ref(db, `users/${editingUser.uid}`)
         const finalPosition = userForm.position === 'Custom' ? userForm.customPosition : userForm.position
         await update(userRef, {
@@ -375,59 +377,126 @@ const Admin: React.FC = () => {
           position: finalPosition,
         })
         toast.success('User updated successfully')
-      } else {
-        // Create new user
-        if (!userForm.password) {
-          toast.error('Password is required')
-          setSaving(false)
-          return
-        }
+        handleCloseUserModal()
+        loadUsers()
+      } catch (e: any) {
+        toast.error(e.message || 'Failed to update user')
+      } finally {
+        setSaving(false)
+      }
+    } else {
+      // Create new user - require PIN confirmation
+      if (!userForm.password) {
+        toast.error('Password is required')
+        return
+      }
 
-        // Store current admin credentials
-        const adminEmail = fbUser?.email
-        const adminPassword = prompt('Please enter your admin password to continue:')
+      // Check if admin has approval PIN set
+      if (!profile?.approvalPin) {
+        toast.error('Please set your approval PIN in Profile settings first')
+        return
+      }
+
+      // Store user data and show PIN modal
+      setPendingUserData(userForm)
+      setShowPinModal(true)
+    }
+  }
+
+  const confirmCreateUser = async () => {
+    if (!adminPin) {
+      toast.error('Please enter your approval PIN')
+      return
+    }
+
+    // Verify PIN
+    if (profile?.approvalPin !== adminPin) {
+      toast.error('Incorrect approval PIN')
+      setAdminPin('')
+      return
+    }
+
+    setSaving(true)
+    setShowPinModal(false)
+    setAdminPin('')
+
+    try {
+      // Get current admin credentials for re-authentication
+      const adminEmail = fbUser?.email
+      if (!adminEmail) {
+        toast.error('Admin email not found')
+        setSaving(false)
+        return
+      }
+
+      // Create new user account using Firebase Admin SDK approach
+      // Note: This creates the account without logging in as that user
+      const { getApp } = await import('firebase/app')
+      const { getFunctions, httpsCallable } = await import('firebase/functions')
+      
+      // Try to use Cloud Function if available, otherwise use client SDK
+      try {
+        const functions = getFunctions(getApp())
+        const createUser = httpsCallable(functions, 'adminCreateUser')
+        const result = await createUser({
+          email: pendingUserData.email,
+          password: pendingUserData.password,
+          displayName: pendingUserData.displayName,
+          department: pendingUserData.department,
+          role: pendingUserData.role,
+          position: pendingUserData.position === 'Custom' ? pendingUserData.customPosition : pendingUserData.position,
+        })
+        toast.success(`User created successfully! Temporary password: ${pendingUserData.password}`)
+      } catch (functionError) {
+        // Fallback to client SDK method
+        console.warn('Cloud function not available, using fallback method')
         
-        if (!adminPassword) {
-          toast.error('Admin password required to create users')
-          setSaving(false)
-          return
-        }
-
-        // Create new user account
-        const userCredential = await createUserWithEmailAndPassword(auth, userForm.email, userForm.password)
+        // Create secondary app instance for user creation
+        const { initializeApp, deleteApp } = await import('firebase/app')
+        const { getAuth, createUserWithEmailAndPassword: createUser } = await import('firebase/auth')
+        
+        const secondaryApp = initializeApp({
+          apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+          authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+          databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+          projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+          storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+          messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+          appId: import.meta.env.VITE_FIREBASE_APP_ID,
+        }, 'Secondary')
+        
+        const secondaryAuth = getAuth(secondaryApp)
+        const userCredential = await createUser(secondaryAuth, pendingUserData.email, pendingUserData.password)
         const newUserId = userCredential.user.uid
 
         // Create user profile in database
-        const finalPosition = userForm.position === 'Custom' ? userForm.customPosition : userForm.position
+        const finalPosition = pendingUserData.position === 'Custom' ? pendingUserData.customPosition : pendingUserData.position
         await set(ref(db, `users/${newUserId}`), {
-          displayName: userForm.displayName,
-          email: userForm.email,
-          department: userForm.department,
-          role: userForm.role,
+          displayName: pendingUserData.displayName,
+          email: pendingUserData.email,
+          department: pendingUserData.department,
+          role: pendingUserData.role,
           position: finalPosition,
           createdAt: serverTimestamp(),
-          lastLogin: serverTimestamp(),
         })
 
-        // Re-authenticate as admin
-        if (adminEmail) {
-          await signInWithEmailAndPassword(auth, adminEmail, adminPassword)
-        }
-
-        toast.success(`User created successfully! Temporary password: ${userForm.password}`)
+        // Delete secondary app to prevent memory leaks
+        await deleteApp(secondaryApp)
+        
+        toast.success(`User created successfully! Temporary password: ${pendingUserData.password}`)
       }
 
+      setPendingUserData(null)
       handleCloseUserModal()
       loadUsers()
     } catch (e: any) {
+      console.error('Error creating user:', e)
       if (e.code === 'auth/email-already-in-use') {
         toast.error('This email is already in use')
       } else if (e.code === 'auth/weak-password') {
-        toast.error('Password is too weak')
-      } else if (e.code === 'auth/wrong-password') {
-        toast.error('Incorrect admin password')
+        toast.error('Password is too weak (minimum 6 characters)')
       } else {
-        toast.error(e.message || 'Failed to save user')
+        toast.error(e.message || 'Failed to create user')
       }
     } finally {
       setSaving(false)
@@ -934,6 +1003,42 @@ const Admin: React.FC = () => {
           </Button>
           <Button size="sm" variant="primary" onClick={handleSaveTeamMember}>
             💾 {editingTeam ? 'Update' : 'Add'} Team Member
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* PIN Confirmation Modal */}
+      <Modal show={showPinModal} onHide={() => { setShowPinModal(false); setAdminPin(''); }} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>🔐 Confirm with Approval PIN</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-3">Please enter your approval PIN to create this user account.</p>
+          <Form.Group>
+            <Form.Label>Approval PIN</Form.Label>
+            <Form.Control
+              type="password"
+              value={adminPin}
+              onChange={(e) => setAdminPin(e.target.value.replace(/\D/g, ''))}
+              placeholder="Enter your 4-digit PIN"
+              maxLength={4}
+              pattern="\d{4}"
+              autoFocus
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  confirmCreateUser()
+                }
+              }}
+            />
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => { setShowPinModal(false); setAdminPin(''); }}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={confirmCreateUser} disabled={saving || !adminPin}>
+            {saving ? 'Creating User...' : 'Confirm & Create'}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { Badge, Button, Card, Col, Form, ListGroup, Modal, Row, Alert } from 'react-bootstrap'
+import React, { useEffect, useMemo, useState, useRef } from 'react'
+import { Badge, Button, Card, Col, Form, ListGroup, Modal, Row, Alert, Accordion } from 'react-bootstrap'
 import { Link, useParams } from 'react-router-dom'
 import { db } from '../firebase'
 import { ref, get, update, serverTimestamp, push, set } from 'firebase/database'
@@ -8,6 +8,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import Loading from '../components/Loading'
 import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
+import { useReactToPrint } from 'react-to-print'
 
 const DEPT_ORDER = ['marketing', 'programming', 'technical', 'admin', 'finance', 'final'] as const
 
@@ -26,6 +27,7 @@ const RequestFlow: React.FC = () => {
   const [pin, setPin] = useState('')
   const [rejectReason, setRejectReason] = useState('')
   const [pendingFormData, setPendingFormData] = useState<any>(null)
+  const printRef = useRef<HTMLDivElement>(null)
 
   const canAct = useMemo(() => {
     if (!profile || !data) return false
@@ -95,6 +97,7 @@ const RequestFlow: React.FC = () => {
         [`steps/${currentStep}/digitalSignature`]: userData.digitalSignature,
         [`steps/${currentStep}/timestamp`]: serverTimestamp(),
         [`steps/${currentStep}/approvedBy`]: profile.uid,
+        updatedAt: Date.now(),
       }
 
       if (next) {
@@ -188,6 +191,7 @@ const RequestFlow: React.FC = () => {
         rejectedReason: rejectReason,
         rejectedAt: serverTimestamp(),
         rejectedByUser: profile.uid,
+        updatedAt: Date.now(),
       })
 
       // Add to history
@@ -230,6 +234,7 @@ const RequestFlow: React.FC = () => {
       const requestRef = ref(db, `requests/${id}`)
       await update(requestRef, {
         [`steps/${currentStep}/form`]: values,
+        updatedAt: Date.now(),
       })
       
       console.log('Form saved successfully to database')
@@ -248,6 +253,11 @@ const RequestFlow: React.FC = () => {
       toast.error(`Failed to save form: ${error.message}`)
     }
   }
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: `OB_Request_${data?.title || 'Details'}`,
+  })
 
   if (loading) return <Loading fullScreen message="Loading request details..." />
   if (!data) return (
@@ -272,7 +282,7 @@ const RequestFlow: React.FC = () => {
         <Col lg={3}>
           <Card className="workflow-sidebar">
             <Card.Body>
-              <h6 className="mb-3 text-muted">WORKFLOW STEPS</h6>
+              <h6 className="mb-3 text-muted">APPROVAL STEPS</h6>
               <div className="workflow-steps">
                 {DEPT_ORDER.map((dept, index) => {
                   const stepStatus = data.steps?.[dept]?.status
@@ -366,18 +376,6 @@ const RequestFlow: React.FC = () => {
                 </Alert>
               )}
 
-              {/* Action Buttons */}
-              {canAct && (
-                <div className="d-flex gap-2 mb-4">
-                  <Button size="sm" variant="success" onClick={() => setShowApprove(true)}>
-                    ✓ Approve
-                  </Button>
-                  <Button size="sm" variant="danger" onClick={() => setShowReject(true)}>
-                    ✗ Reject
-                  </Button>
-                </div>
-              )}
-
               {/* Department Form */}
               <DeptForm
                 department={data.currentStep}
@@ -386,10 +384,25 @@ const RequestFlow: React.FC = () => {
                 readOnly={!canAct}
                 requestData={data}
                 onChange={setPendingFormData}
+                printRef={printRef}
+                handlePrint={handlePrint}
+                profile={profile}
               />
 
+              {/* Action Buttons at Bottom */}
+              {canAct && (
+                <div className="d-flex gap-2 mt-4 mb-3">
+                  <Button size="sm" variant="success" onClick={() => setShowApprove(true)}>
+                    ✓ Approve Request
+                  </Button>
+                  <Button size="sm" variant="danger" onClick={() => setShowReject(true)}>
+                    ✗ Reject Request
+                  </Button>
+                </div>
+              )}
+
               {/* Back Link */}
-              <div className="mt-4">
+              <div className="mt-3">
                 <Link to="/requests" className="btn btn-sm btn-outline-secondary">
                   ← Back to Requests
                 </Link>
@@ -453,13 +466,15 @@ const RequestFlow: React.FC = () => {
                   size="sm"
                   type="password" 
                   value={pin} 
-                  onChange={(e) => setPin(e.target.value)} 
-                  placeholder="Enter your PIN"
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))} 
+                  placeholder="Enter your 4-digit PIN"
                   required
                   autoFocus
+                  maxLength={4}
+                  pattern="\d{4}"
                 />
                 <Form.Text className="text-muted">
-                  Enter the PIN you set in your profile to confirm and sign this approval
+                  Enter the 4-digit PIN you set in your profile to confirm and sign this approval
                 </Form.Text>
               </Form.Group>
             </Form>
@@ -506,7 +521,10 @@ const DeptForm: React.FC<{
   readOnly?: boolean;
   requestData?: any;
   onChange?: (v: any) => void;
-}> = ({ department, values, onSave, readOnly, requestData, onChange }) => {
+  printRef?: React.RefObject<HTMLDivElement>;
+  handlePrint?: () => void;
+  profile?: any;
+}> = ({ department, values, onSave, readOnly, requestData, onChange, printRef, handlePrint, profile }) => {
   const [formData, setFormData] = useState(values || {})
   const [teamMembers, setTeamMembers] = useState<any[]>([])
   const [equipmentList, setEquipmentList] = useState<any[]>([])
@@ -557,25 +575,56 @@ const DeptForm: React.FC<{
     }
   }
 
-  const printDetails = () => {
-    window.print()
-  }
-
   // Programming Department Form
   if (department === 'programming') {
     return (
-      <Form onSubmit={submit}>
-        <Row className="g-3">
+      <>
+        {/* Previous Details Accordion */}
+        <Accordion className="mb-3">
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>📄 View Previous Details (Marketing)</Accordion.Header>
+            <Accordion.Body>
+              <Card>
+                <Card.Header className="bg-primary text-white">
+                  <strong>Marketing Department</strong>
+                </Card.Header>
+                <Card.Body>
+                  <p><strong>Event:</strong> {requestData?.title}</p>
+                  <p><strong>Location:</strong> {requestData?.location}</p>
+                  <p><strong>Client:</strong> {requestData?.client || 'N/A'}</p>
+                  <p><strong>Schedule:</strong> {requestData?.proposedSchedule ? new Date(requestData.proposedSchedule).toLocaleString() : 'N/A'}</p>
+                  {(profile?.department === 'marketing' || profile?.department === 'finance') && requestData?.estimatedCost !== undefined && (
+                    <p><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</p>
+                  )}
+                  <p><strong>Crew Required:</strong> {Object.entries(requestData?.crewRequired || {})
+                    .filter(([, v]) => v)
+                    .map(([k]) => k)
+                    .join(', ') || 'None'}</p>
+                  {requestData?.marketingNotes && <p className="mb-0"><strong>Notes:</strong> {requestData.marketingNotes}</p>}
+                </Card.Body>
+              </Card>
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+
+        <Form onSubmit={submit}>
+          <Row className="g-3">
           <Col md={6}>
             <Form.Group>
               <Form.Label className="fw-semibold small">Presenter/s</Form.Label>
-              <Form.Control 
-                size="sm"
-                value={formData.presenters || ''} 
-                onChange={(e) => updateField('presenters', e.target.value)} 
-                disabled={readOnly}
-                placeholder="e.g., John Doe, Jane Smith" 
+              <CreatableSelect
+                isMulti
+                options={[]}
+                value={formData.presenters || []}
+                onChange={(selected) => updateField('presenters', selected)}
+                isDisabled={readOnly}
+                placeholder="Type presenter name and press Enter"
+                className="react-select-container"
+                classNamePrefix="react-select"
               />
+              <Form.Text className="text-muted small">
+                Type presenter name and press Enter to add multiple
+              </Form.Text>
             </Form.Group>
           </Col>
           <Col md={6}>
@@ -636,12 +685,8 @@ const DeptForm: React.FC<{
             </Form.Group>
           </Col>
         </Row>
-        {!readOnly && (
-          <div className="mt-3">
-            <Button size="sm" type="submit">💾 Save Changes</Button>
-          </div>
-        )}
-      </Form>
+        </Form>
+      </>
     )
   }
 
@@ -678,7 +723,45 @@ const DeptForm: React.FC<{
     }
 
     return (
-      <Form onSubmit={submit}>
+      <>
+        {/* Previous Details Accordion */}
+        <Accordion className="mb-3">
+          <Accordion.Item eventKey="0">
+            <Accordion.Header>📄 View Previous Details</Accordion.Header>
+            <Accordion.Body>
+              <Card className="mb-2">
+                <Card.Header className="bg-primary text-white py-1">
+                  <small><strong>Marketing</strong></small>
+                </Card.Header>
+                <Card.Body className="py-2">
+                  <small>
+                    <p className="mb-1"><strong>Event:</strong> {requestData?.title}</p>
+                    <p className="mb-0"><strong>Client:</strong> {requestData?.client || 'N/A'}</p>
+                  </small>
+                </Card.Body>
+              </Card>
+              {requestData?.steps?.programming && (
+                <Card className="mb-0">
+                  <Card.Header className="bg-info text-white py-1">
+                    <small><strong>Programming</strong></small>
+                  </Card.Header>
+                  <Card.Body className="py-2">
+                    <small>
+                      <p className="mb-1"><strong>Presenters:</strong> {
+                        Array.isArray(requestData.steps.programming.form?.presenters) 
+                          ? requestData.steps.programming.form?.presenters?.map((p: any) => p.label).join(', ') 
+                          : requestData.steps.programming.form?.presenters || 'N/A'
+                      }</p>
+                      <p className="mb-0"><strong>Content:</strong> {requestData.steps.programming.form?.contentAlignment || 'N/A'}</p>
+                    </small>
+                  </Card.Body>
+                </Card>
+              )}
+            </Accordion.Body>
+          </Accordion.Item>
+        </Accordion>
+
+        <Form onSubmit={submit}>
         <Row className="g-3">
           <Col md={12}>
             <Form.Group>
@@ -749,11 +832,6 @@ const DeptForm: React.FC<{
             </Form.Group>
           </Col>
         </Row>
-        {!readOnly && (
-          <div className="mt-3">
-            <Button size="sm" type="submit">💾 Save Changes</Button>
-          </div>
-        )}
       </Form>
     )
   }
@@ -762,6 +840,11 @@ const DeptForm: React.FC<{
   if (department === 'admin') {
     return (
       <Form onSubmit={submit}>
+        <div className="mb-3">
+          <Button size="sm" variant="outline-primary" onClick={() => setShowDetailsModal(true)}>
+            📄 View Previous Details
+          </Button>
+        </div>
         <Row className="g-3">
           <Col md={12}>
             <Form.Group>
@@ -778,27 +861,20 @@ const DeptForm: React.FC<{
             </Form.Group>
           </Col>
         </Row>
-        {!readOnly && (
-          <div className="mt-3">
-            <Button size="sm" type="submit">💾 Save Changes</Button>
-          </div>
-        )}
       </Form>
     )
   }
 
   // Finance Department Form
   if (department === 'finance') {
-    const marketingBudget = requestData?.estimatedCost || 'N/A'
-    
     return (
       <Form onSubmit={submit}>
+        <div className="mb-3">
+          <Button size="sm" variant="outline-primary" onClick={() => setShowDetailsModal(true)}>
+            📄 View Previous Details
+          </Button>
+        </div>
         <Row className="g-3">
-          <Col md={12}>
-            <Alert variant="info" className="small">
-              <strong>Budget Requested by Marketing:</strong> ${marketingBudget}
-            </Alert>
-          </Col>
           <Col md={6}>
             <Form.Group>
               <Form.Label className="fw-semibold small">Amount Allocated ($)</Form.Label>
@@ -845,11 +921,6 @@ const DeptForm: React.FC<{
             </Form.Group>
           </Col>
         </Row>
-        {!readOnly && (
-          <div className="mt-3">
-            <Button size="sm" type="submit">💾 Save Changes</Button>
-          </div>
-        )}
       </Form>
     )
   }
@@ -873,7 +944,10 @@ const DeptForm: React.FC<{
             </Col>
             <Col md={6}>
               <div><strong>Schedule:</strong> {requestData?.proposedSchedule ? new Date(requestData.proposedSchedule).toLocaleString() : 'N/A'}</div>
-              <div><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</div>
+              {/* Show Estimated Cost only to Marketing and Finance */}
+              {(profile?.department === 'marketing' || profile?.department === 'finance') && (
+                <div><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</div>
+              )}
               <div><strong>Status:</strong> <Badge bg="success">Approved</Badge></div>
             </Col>
           </Row>
@@ -907,10 +981,10 @@ const DeptForm: React.FC<{
         {/* Full Details Modal */}
         <Modal show={showDetailsModal} onHide={() => setShowDetailsModal(false)} size="xl">
           <Modal.Header closeButton>
-            <Modal.Title>Complete Request Details</Modal.Title>
+            <Modal.Title>Previous Department Details</Modal.Title>
           </Modal.Header>
           <Modal.Body style={{ maxHeight: '70vh', overflowY: 'auto' }}>
-            <div className="print-content">
+            <div ref={printRef} className="print-content">
               <h5 className="mb-3">OB Request Details - {requestData?.title}</h5>
               
               {/* Marketing */}
@@ -924,21 +998,18 @@ const DeptForm: React.FC<{
                   )}
                 </Card.Header>
                 <Card.Body>
-                  <Row>
-                    <Col md={6}>
-                      <p><strong>Event:</strong> {requestData?.title}</p>
-                      <p><strong>Location:</strong> {requestData?.location}</p>
-                      <p><strong>Client:</strong> {requestData?.client || 'N/A'}</p>
-                    </Col>
-                    <Col md={6}>
-                      <p><strong>Schedule:</strong> {requestData?.proposedSchedule ? new Date(requestData.proposedSchedule).toLocaleString() : 'N/A'}</p>
-                      <p><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</p>
-                      <p><strong>Crew Required:</strong> {Object.entries(requestData?.crewRequired || {})
-                        .filter(([, v]) => v)
-                        .map(([k]) => k)
-                        .join(', ') || 'None'}</p>
-                    </Col>
-                  </Row>
+                  <p><strong>Event:</strong> {requestData?.title}</p>
+                  <p><strong>Location:</strong> {requestData?.location}</p>
+                  <p><strong>Client:</strong> {requestData?.client || 'N/A'}</p>
+                  <p><strong>Schedule:</strong> {requestData?.proposedSchedule ? new Date(requestData.proposedSchedule).toLocaleString() : 'N/A'}</p>
+                  {/* Show Estimated Cost only to Marketing and Finance */}
+                  {(profile?.department === 'marketing' || profile?.department === 'finance') && requestData?.estimatedCost !== undefined && (
+                    <p><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</p>
+                  )}
+                  <p><strong>Crew Required:</strong> {Object.entries(requestData?.crewRequired || {})
+                    .filter(([, v]) => v)
+                    .map(([k]) => k)
+                    .join(', ') || 'None'}</p>
                   {requestData?.marketingNotes && <p><strong>Notes:</strong> {requestData.marketingNotes}</p>}
                 </Card.Body>
               </Card>
@@ -955,7 +1026,11 @@ const DeptForm: React.FC<{
                     )}
                   </Card.Header>
                   <Card.Body>
-                    <p><strong>Presenters:</strong> {requestData.steps.programming.form?.presenters || 'N/A'}</p>
+                    <p><strong>Presenters:</strong> {
+                      Array.isArray(requestData.steps.programming.form?.presenters) 
+                        ? requestData.steps.programming.form?.presenters?.map((p: any) => p.label).join(', ') 
+                        : requestData.steps.programming.form?.presenters || 'N/A'
+                    }</p>
                     <p><strong>Crossover Times:</strong> {requestData.steps.programming.form?.crossoverTimes?.map((t: any) => t.label).join(', ') || 'N/A'}</p>
                     <p><strong>Content Alignment:</strong> {requestData.steps.programming.form?.contentAlignment || 'N/A'}</p>
                     {requestData.steps.programming.form?.notes && <p><strong>Notes:</strong> {requestData.steps.programming.form.notes}</p>}
@@ -1000,8 +1075,8 @@ const DeptForm: React.FC<{
                 </Card>
               )}
 
-              {/* Finance */}
-              {requestData?.steps?.finance && (
+              {/* Finance - Show only to Marketing and Finance departments */}
+              {(profile?.department === 'marketing' || profile?.department === 'finance') && requestData?.steps?.finance && (
                 <Card className="mb-3">
                   <Card.Header className="bg-success text-white">
                     <strong>Finance Department</strong>
@@ -1030,13 +1105,62 @@ const DeptForm: React.FC<{
                   </Card.Body>
                 </Card>
               )}
+
+              {/* Signature Section - Only visible in print */}
+              <div style={{ marginTop: '3rem', pageBreakInside: 'avoid' }}>
+                <h6 style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem', marginBottom: '2rem' }}>Signatures</h6>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '2rem' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <strong>Station Manager</strong>
+                    </div>
+                    <div style={{ marginTop: '2.5rem', marginBottom: '0.25rem' }}>
+                      <div style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}></div>
+                    </div>
+                    <div style={{ marginTop: '0.25rem' }}>
+                      <small style={{ fontStyle: 'italic' }}>Signature</small>
+                    </div>
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <small>Date: {new Date().toLocaleDateString()}</small>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <strong>Technical Manager</strong>
+                    </div>
+                    <div style={{ marginTop: '2.5rem', marginBottom: '0.25rem' }}>
+                      <div style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}></div>
+                    </div>
+                    <div style={{ marginTop: '0.25rem' }}>
+                      <small style={{ fontStyle: 'italic' }}>Signature</small>
+                    </div>
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <small>Date: {new Date().toLocaleDateString()}</small>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <strong>Sales Manager</strong>
+                    </div>
+                    <div style={{ marginTop: '2.5rem', marginBottom: '0.25rem' }}>
+                      <div style={{ borderBottom: '2px solid #000', paddingBottom: '0.5rem' }}></div>
+                    </div>
+                    <div style={{ marginTop: '0.25rem' }}>
+                      <small style={{ fontStyle: 'italic' }}>Signature</small>
+                    </div>
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <small>Date: {new Date().toLocaleDateString()}</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" size="sm" onClick={() => setShowDetailsModal(false)}>
               Close
             </Button>
-            <Button variant="primary" size="sm" onClick={printDetails}>
+            <Button variant="primary" size="sm" onClick={handlePrint}>
               🖨️ Print
             </Button>
           </Modal.Footer>
@@ -1058,7 +1182,10 @@ const DeptForm: React.FC<{
           </Col>
           <Col md={6}>
             <div><strong>Schedule:</strong> {requestData?.proposedSchedule ? new Date(requestData.proposedSchedule).toLocaleString() : 'N/A'}</div>
-            <div><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</div>
+            {/* Show Estimated Cost only to Marketing and Finance */}
+            {(profile?.department === 'marketing' || profile?.department === 'finance') && (
+              <div><strong>Estimated Cost:</strong> ${requestData?.estimatedCost || 0}</div>
+            )}
           </Col>
         </Row>
         {requestData?.steps?.marketing?.notes && (
