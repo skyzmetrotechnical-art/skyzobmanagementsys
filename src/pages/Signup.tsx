@@ -3,6 +3,7 @@ import { Card, Button, Form } from 'react-bootstrap'
 import { useNavigate, Navigate, Link } from 'react-router-dom'
 import { useAuth, type Department } from '../context/AuthContext'
 import { ToastContainer, toast } from 'react-toastify'
+import Logo from '../components/Logo'
 
 const Signup: React.FC = () => {
   const { signup, fbUser } = useAuth()
@@ -35,7 +36,10 @@ const Signup: React.FC = () => {
       <ToastContainer position="top-right" />
       <Card style={{ width: 450 }}>
         <Card.Body>
-          <Card.Title className="mb-3">Create Account</Card.Title>
+          <div className="text-center mb-4">
+            <Logo size="large" showText={true} className="justify-center" />
+          </div>
+          <Card.Title className="mb-3 text-center">Create Account for OB Management System</Card.Title>
           <Form onSubmit={onSubmit}>
             <Form.Group className="mb-3">
               <Form.Label>Full Name</Form.Label>

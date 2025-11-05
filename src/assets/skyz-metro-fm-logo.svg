@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 120" style="background: white;">
+  <!-- Radio waves -->
+  <g stroke="#4A90E2" stroke-width="3" fill="none">
+    <path d="M 50 40 Q 80 20 110 40"/>
+    <path d="M 45 45 Q 80 15 115 45"/>
+    <path d="M 40 50 Q 80 10 120 50"/>
+  </g>
+  
+  <!-- SKYZ text -->
+  <text x="20" y="85" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#E67E22">S</text>
+  <text x="45" y="85" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#E67E22">K</text>
+  <text x="70" y="85" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#E67E22">Y</text>
+  <text x="95" y="85" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#E67E22">Z</text>
+  
+  <!-- METRO FM text -->
+  <text x="130" y="75" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2C3E50">METRO</text>
+  <text x="130" y="95" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#E67E22">FM</text>
+  
+  <!-- Radio tower icon -->
+  <g stroke="#4A90E2" stroke-width="2" fill="#4A90E2">
+    <rect x="76" y="55" width="8" height="25"/>
+    <circle cx="80" cy="52" r="3"/>
+    <line x1="74" y1="58" x2="86" y2="58"/>
+    <line x1="72" y1="62" x2="88" y2="62"/>
+  </g>
+</svg>

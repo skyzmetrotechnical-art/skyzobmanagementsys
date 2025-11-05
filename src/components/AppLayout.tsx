@@ -2,6 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Dropdown } from 'react-bootstrap'
+import logoImage from '../assets/logo.png'
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, logout } = useAuth()
@@ -20,7 +21,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <div className="top-navbar-container">
           <div className="top-navbar-brand">
             <NavLink to="/" className="brand-link">
-              📻 OB Management System
+              <img src={logoImage} style={{width: '80px'}}/>
+              <span className="ml-3 font-semibold">OB System</span>
             </NavLink>
           </div>
           

@@ -44,6 +44,9 @@ body {
   color: #1e293b;
   text-decoration: none;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .top-navbar-brand .brand-link:hover {
